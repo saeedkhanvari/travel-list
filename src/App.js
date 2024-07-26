@@ -14,7 +14,7 @@ function Logo() {
     </>
   );
 }
-function Form() {
+function Form({ onAddItems }) {
   const [description, setDiscription] = useState("");
   const [quantity, setQuantity] = useState(1);
 
@@ -29,6 +29,9 @@ function Form() {
       quantity,
       package: false,
     };
+
+    onAddItems(newItem);
+
     console.table(newItem);
     setDiscription("");
     setQuantity(1);
@@ -59,11 +62,11 @@ function Form() {
     </>
   );
 }
-function PackingList({ initialItems }) {
+function PackingList({ initialItems, items }) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map((item) => (
+        {items.map((item) => (
           <Item item={item} key={item.id} />
         ))}
       </ul>
@@ -91,13 +94,23 @@ function Status() {
 }
 
 export default function App() {
+  const [items, setItems] = useState([]);
+
+  function handleAddItems(item) {
+    setItems((items) => [...items, item]);
+  }
+
   return (
     <>
       <div className="app">
         <Logo />
-        <Form />
-        <Counter />
-        <PackingList initialItems={initialItems} />
+        <Form onAddItems={handleAddItems} />
+        {/* <Counter /> */}
+        <PackingList
+          initialItems={initialItems}
+          items={items}
+          setItems={setItems}
+        />
         <Status />
       </div>
     </>
