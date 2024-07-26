@@ -3,7 +3,7 @@ import Counter from "./Challenge";
 
 let initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: false },
-  { id: 2, description: "Socks", quantity: 12, packed: true },
+  { id: 2, description: "Socks", quantity: 12, packed: false },
   { id: 3, description: "Charger", quantity: 1, packed: false },
 ];
 
@@ -62,25 +62,39 @@ function Form({ onAddItems }) {
     </>
   );
 }
-function PackingList({ initialItems, items }) {
+function PackingList({ initialItems, items, onDeleteItems, onUpdateItems }) {
   return (
     <div className="list">
       <ul>
         {items.map((item) => (
-          <Item item={item} key={item.id} />
+          <Item
+            item={item}
+            key={item.id}
+            onDeleteItems={onDeleteItems}
+            onUpdateItems={onUpdateItems}
+          />
         ))}
       </ul>
     </div>
   );
 }
-function Item({ item }) {
+function Item({ item, onDeleteItems, onUpdateItems }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => {
+          onUpdateItems(item.id);
+        }}
+      />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity + " "}
         {item.description}
       </span>
-      <button style={{ color: "red" }}>X</button>
+      <button onClick={() => onDeleteItems(item.id)} style={{ color: "red" }}>
+        X
+      </button>
     </li>
   );
 }
@@ -94,12 +108,23 @@ function Status() {
 }
 
 export default function App() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(initialItems);
 
   function handleAddItems(item) {
     setItems((items) => [...items, item]);
   }
 
+  function handleDeleteItem(id) {
+    setItems((items) => items.filter((item) => item.id !== id));
+  }
+
+  function handleToggleItem(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
   return (
     <>
       <div className="app">
@@ -110,6 +135,8 @@ export default function App() {
           initialItems={initialItems}
           items={items}
           setItems={setItems}
+          onDeleteItems={handleDeleteItem}
+          onUpdateItems={handleToggleItem}
         />
         <Status />
       </div>
