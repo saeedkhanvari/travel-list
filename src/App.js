@@ -63,10 +63,24 @@ function Form({ onAddItems }) {
   );
 }
 function PackingList({ initialItems, items, onDeleteItems, onUpdateItems }) {
+  const [sortBy, setSortBy] = useState("input");
+
+  let sortedItems;
+
+  if (sortBy === "input") sortedItems = items;
+  if (sortBy === "description")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description));
+  if (sortBy === "packed")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
+
   return (
     <div className="list">
       <ul>
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <Item
             item={item}
             key={item.id}
@@ -75,6 +89,14 @@ function PackingList({ initialItems, items, onDeleteItems, onUpdateItems }) {
           />
         ))}
       </ul>
+
+      <div className="actions">
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="input">sort by input order</option>
+          <option value="description">sort by description</option>
+          <option value="packed">sort by packed status</option>
+        </select>
+      </div>
     </div>
   );
 }
@@ -98,13 +120,31 @@ function Item({ item, onDeleteItems, onUpdateItems }) {
     </li>
   );
 }
-function Status() {
+function Status({ items }) {
+  if (items.length == 0)
+    return (
+      <p className="stats">
+        <em>let's add new items to array</em>
+      </p>
+    );
+
+  const numItems = items.length;
+  const numPacked = items.filter((item) => item.packed).length;
+  const numPercent = Math.round((numPacked / numItems) * 100);
+
   return (
     <>
-      <footer className="stats"></footer>
+      <footer className="stats">
+        <em>
+          {numPercent == 100
+            ? "you are ready to go"
+            : `you have ${numItems} items on your list, and you already packed
+            ${numPacked} (${numPercent}%) `}
+        </em>
+        ;
+      </footer>
     </>
   );
-  <em> you have x items on your list, and you already packed X (X%) </em>;
 }
 
 export default function App() {
@@ -138,7 +178,7 @@ export default function App() {
           onDeleteItems={handleDeleteItem}
           onUpdateItems={handleToggleItem}
         />
-        <Status />
+        <Status items={items} />
       </div>
     </>
   );
